@@ -1,4 +1,11 @@
-const { mkdir, readdir, stat, copyFile, rmdir, unlink } = require('node:fs/promises');
+const {
+  mkdir,
+  readdir,
+  stat,
+  copyFile,
+  rmdir,
+  unlink,
+} = require('node:fs/promises');
 const path = require('path');
 
 const startFolder = 'files';
@@ -18,7 +25,7 @@ async function dirExists(folderPath) {
 
 async function copyFiles() {
   try {
-    const isExist = dirExists(path.join(taskFolder, newFolder))
+    const isExist = dirExists(path.join(taskFolder, newFolder));
     if (isExist) {
       const filesOld = await readdir(path.join(taskFolder, newFolder));
       for (const file of filesOld) {
@@ -37,11 +44,12 @@ async function copyFiles() {
     for (const file of files) {
       const stats = await stat(path.join(taskFolder, startFolder, file));
       if (stats.isFile()) {
-        await copyFile(path.join(taskFolder, startFolder, file), path.join(taskFolder, newFolder, file));
+        await copyFile(
+          path.join(taskFolder, startFolder, file),
+          path.join(taskFolder, newFolder, file),
+        );
       }
-
     }
-
   } catch (error) {
     console.error('Error copying files:', error);
   }

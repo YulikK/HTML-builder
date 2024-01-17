@@ -1,10 +1,10 @@
 // const { mkdir, readdir, stat, copyFile, rmdir, unlink } = require('node:fs/promises');
-const fs = require("fs").promises;
+const fs = require('fs').promises;
 const path = require('path');
 
 async function createBundle(folderPath) {
   const files = await fs.readdir(folderPath);
-  const cssFiles = files.filter(file => file.endsWith('.css'));
+  const cssFiles = files.filter((file) => file.endsWith('.css'));
   let cssContent = '';
 
   for (const file of cssFiles) {
