@@ -2,19 +2,46 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-async function createBundle(folderPath) {
-  const files = await fs.readdir(folderPath);
-  const cssFiles = files.filter((file) => file.endsWith('.css'));
-  let cssContent = '';
+const pathTask = path.dirname(__filename);
+const distFolder = 'project-dist';
+const pathDistFolder = path.join(pathTask, distFolder);
+const cssBundleName = 'bundle.css';
+const cssFolder = 'styles';
+const pathCssFolder = path.join(pathTask, cssFolder);
 
-  for (const file of cssFiles) {
-    const filePath = path.join(folderPath, file);
-    const fileContent = await fs.readFile(filePath, 'utf-8');
-    cssContent += fileContent;
-  }
-
-  const outputPath = path.join(__dirname, 'project-dist', 'bundle.css');
-  await fs.writeFile(outputPath, cssContent);
+function startBuild() {
+  return fs
+    .access(pathDistFolder)
+    .then(() => {
+      console.log(`1. Looking for the ${distFolder} folder`);
+    })
+    .catch(() => {
+      console.log(` - create directory ${distFolder}`);
+      return fs.mkdir(pathDistFolder);
+    })
+    .then(() => {
+      console.log('2. Make css bundle');
+      return makeCssBundle(pathCssFolder, pathDistFolder);
+    });
 }
 
-createBundle(path.join(__dirname, 'styles'));
+function makeCssBundle(source, destination) {
+  return fs
+    .readdir(source)
+    .then((files) => {
+      const bundlePromises = files
+        .filter((file) => file.endsWith('.css'))
+        .map((file) => {
+          const filePath = path.join(source, file);
+          return fs.readFile(filePath);
+        });
+      return Promise.all(bundlePromises);
+    })
+    .then((cssContent) => {
+      const bundleContent = cssContent.join('\n');
+      const bundlePath = path.join(destination, cssBundleName);
+      return fs.writeFile(bundlePath, bundleContent);
+    });
+}
+
+startBuild();
