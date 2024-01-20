@@ -8,7 +8,7 @@ stdout.write('What are we gonna put in the file?\n');
 stdout.write('new text line: ');
 
 stdin.on('data', (data) => {
-  if (data.toString().split('\n').join('') === 'exit') {
+  if (data.toString().toString().trim() === 'exit') {
     process.exit();
   } else {
     output.write(data);
