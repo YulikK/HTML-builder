@@ -6,7 +6,7 @@ function startTask() {
   return fs.readdir(folderPath, { withFileTypes: true }).then((files) => {
     files.map((file) => {
       if(file.isFile()) {
-        const filePath = path.join(file.path, file.name);
+        const filePath = path.join(folderPath, file.name);
         return fs.stat(filePath).then((stats) => {
           const fileInfo = {
             name: file.name.split('.').slice(0, 1),
