@@ -10,32 +10,46 @@ const componentsName = 'components';
 const cssBundleName = 'style.css';
 const pathTask = path.dirname(__filename);
 const pathDist = path.join(pathTask, distName);
+const pathAssetDist = path.join(pathDist, assetName);
 const pathAsset = path.join(pathTask, assetName);
 const pathCss = path.join(pathTask, cssName);
 const pathComponents = path.join(pathTask, componentsName);
 const pathHtml = path.join(pathTask, htmlName);
 
 function startBuild() {
+  console.log(`1. Looking for the ${distName} folder`);
   return fs
     .access(pathDist)
     .then(() => {
-      console.log(`1. Looking for the ${distName} folder`);
+      console.log(`- clear the ${distName} folder`);
       return clearDirectory(pathDist);
     })
     .catch(() => {
-      console.log(` - create directory ${distName}`);
+      console.log(`- create directory ${distName}`);
       return fs.mkdir(pathDist);
     })
     .then(() => {
-      console.log(`2. Copying the assembly files ${assetName}`);
-      return copyDirectory(pathAsset, pathDist);
+      console.log(`2. Looking for the ${assetName} folder`);
+      return fs.access(pathAssetDist);
     })
     .then(() => {
-      console.log('3. Make css bundle');
+      console.log(`- clear the ${assetName} folder`);
+      return clearDirectory(pathAssetDist);
+    })
+    .catch(() => {
+      console.log(`- create directory ${assetName}`);
+      return fs.mkdir(pathAssetDist);
+    })
+    .then(() => {
+      console.log(`3. Copying the assembly files ${assetName}`);
+      return copyDirectory(pathAsset, pathAssetDist);
+    })
+    .then(() => {
+      console.log('4. Make css bundle');
       return makeCssBundle(pathCss, pathDist);
     })
     .then(() => {
-      console.log('4. Make HTML-file');
+      console.log('5. Make HTML-file');
       return makeHtml(pathHtml, pathComponents, pathDist);
     });
 }
