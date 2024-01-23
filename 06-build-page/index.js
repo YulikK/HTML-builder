@@ -29,18 +29,6 @@ function startBuild() {
       return fs.mkdir(pathDist);
     })
     .then(() => {
-      console.log(`2. Looking for the ${assetName} folder`);
-      return fs.access(pathAssetDist);
-    })
-    .then(() => {
-      console.log(`- clear the ${assetName} folder`);
-      return clearDirectory(pathAssetDist);
-    })
-    .catch(() => {
-      console.log(`- create directory ${assetName}`);
-      return fs.mkdir(pathAssetDist);
-    })
-    .then(() => {
       console.log(`3. Copying the assembly files ${assetName}`);
       return copyDirectory(pathAsset, pathAssetDist);
     })
@@ -62,7 +50,8 @@ function clearDirectory(directory) {
         .stat(filePath)
         .then((stat) => {
           if (stat.isDirectory()) {
-            return clearDirectory(filePath).then(() => fs.rmdir(filePath));
+            return clearDirectory(filePath)
+            .then(() => fs.rmdir(filePath));
           } else {
             return fs.unlink(filePath);
           }
@@ -77,24 +66,29 @@ function clearDirectory(directory) {
 }
 
 function copyDirectory(source, destination) {
-  return fs.readdir(source).then((files) => {
-    const copyPromises = files.map((file) => {
-      const sourcePath = path.join(source, file);
-      const destPath = path.join(destination, file);
-
-      return fs.stat(sourcePath).then((stat) => {
-        if (stat.isDirectory()) {
-          return fs
-            .mkdir(destPath)
-            .then(() => copyDirectory(sourcePath, destPath));
-        } else {
-          return fs.copyFile(sourcePath, destPath);
-        }
+  return fs.access(destination)
+  .catch(() => {
+      return fs.mkdir(destination);
+    })
+  .then(() => {
+    return fs.readdir(source).then((files) => {
+      const copyPromises = files.map((file) => {
+        const sourcePath = path.join(source, file);
+        const destPath = path.join(destination, file);
+  
+        return fs.stat(sourcePath).then((stat) => {
+          if (stat.isDirectory()) {
+            return copyDirectory(sourcePath, destPath);
+          } else {
+            return fs.copyFile(sourcePath, destPath);
+          }
+        });
       });
+  
+      return copyPromises;
     });
-
-    return copyPromises;
-  });
+  })
+  
 }
 
 function makeCssBundle(source, destination) {
